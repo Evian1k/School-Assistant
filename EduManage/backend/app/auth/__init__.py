@@ -1,0 +1,1 @@
+# Auth module for role-based access control
