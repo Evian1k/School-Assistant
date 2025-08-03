@@ -49,6 +49,7 @@ export const endpoints = {
   students: '/api/v1/students',
   studentProfile: '/api/v1/students/my-profile',
   studentsByGuardian: (guardianId) => `/api/v1/students/by-guardian/${guardianId}`,
+  studentById: (studentId) => `/api/v1/students/${studentId}`,
   
   // Attendance
   attendance: '/api/v1/attendance',
@@ -68,10 +69,49 @@ export const endpoints = {
   overdueFees: '/api/v1/fees/overdue',
   bulkCreateFees: '/api/v1/fees/bulk-create',
   
-  // Grades (to be implemented)
+  // Grades
   grades: '/api/v1/grades',
   myGrades: '/api/v1/grades/my-grades',
   studentGrades: (studentId) => `/api/v1/grades/student/${studentId}`,
+  gradeSummary: (studentId) => `/api/v1/grades/student/${studentId}/summary`,
+  bulkCreateGrades: '/api/v1/grades/bulk-create',
+  subjects: '/api/v1/grades/subjects',
+  classGrades: (className) => `/api/v1/grades/class/${className}/grades`,
+  
+  // Teachers
+  teachers: '/api/v1/teachers',
+  teacherProfile: '/api/v1/teachers/my-profile',
+  teacherClasses: '/api/v1/teachers/my-classes',
+  teacherStudents: '/api/v1/teachers/my-students',
+  teacherSubjects: '/api/v1/teachers/my-subjects',
+  teacherDashboardStats: '/api/v1/teachers/dashboard-stats',
+  classStudents: (className) => `/api/v1/teachers/class/${className}/students`,
+  updateTeacherProfile: '/api/v1/teachers/update-profile',
+  
+  // Admin
+  adminDashboardStats: '/api/v1/admin/dashboard-stats',
+  allUsers: '/api/v1/admin/users',
+  toggleUserStatus: (userId) => `/api/v1/admin/users/${userId}/toggle-status`,
+  resetUserPassword: (userId) => `/api/v1/admin/users/${userId}/reset-password`,
+  bulkNotifications: '/api/v1/admin/bulk-notifications',
+  attendanceReport: '/api/v1/admin/reports/attendance',
+  feeReport: '/api/v1/admin/reports/fees',
+  academicReport: '/api/v1/admin/reports/academic',
+  systemInfo: '/api/v1/admin/system-info',
+  exportData: '/api/v1/admin/backup/export',
+  
+  // Guardians
+  guardians: '/api/v1/guardians',
+  guardianProfile: '/api/v1/guardians/my-profile',
+  myChildren: '/api/v1/guardians/my-children',
+  childAttendance: (childId) => `/api/v1/guardians/children/${childId}/attendance`,
+  childGrades: (childId) => `/api/v1/guardians/children/${childId}/grades`,
+  childFees: (childId) => `/api/v1/guardians/children/${childId}/fees`,
+  childSummary: (childId) => `/api/v1/guardians/children/${childId}/summary`,
+  guardianDashboardStats: '/api/v1/guardians/dashboard-stats',
+  updateGuardianProfile: '/api/v1/guardians/update-profile',
+  linkChild: (guardianId) => `/api/v1/guardians/${guardianId}/link-child`,
+  unlinkChild: (guardianId, studentId) => `/api/v1/guardians/${guardianId}/unlink-child/${studentId}`,
 };
 
 export default api;

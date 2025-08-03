@@ -23,11 +23,19 @@ def create_app():
     from .routes.student_routes import student_bp
     from .routes.attendance_routes import attendance_bp
     from .routes.fee_routes import fee_bp
+    from .routes.grade_routes import grade_bp
+    from .routes.teacher_routes import teacher_bp
+    from .routes.admin_routes import admin_bp
+    from .routes.guardian_routes import guardian_bp
     
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(student_bp, url_prefix='/api/v1/students')
     app.register_blueprint(attendance_bp, url_prefix='/api/v1/attendance')
     app.register_blueprint(fee_bp, url_prefix='/api/v1/fees')
+    app.register_blueprint(grade_bp, url_prefix='/api/v1/grades')
+    app.register_blueprint(teacher_bp, url_prefix='/api/v1/teachers')
+    app.register_blueprint(admin_bp, url_prefix='/api/v1/admin')
+    app.register_blueprint(guardian_bp, url_prefix='/api/v1/guardians')
     
     # Create tables
     with app.app_context():

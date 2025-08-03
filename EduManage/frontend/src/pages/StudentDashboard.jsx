@@ -129,10 +129,160 @@ const StudentHome = () => {
 };
 
 const StudentGrades = () => {
+  const [grades, setGrades] = useState([]);
+  const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedSubject, setSelectedSubject] = useState('');
+  const [selectedTerm, setSelectedTerm] = useState('');
+
+  useEffect(() => {
+    fetchGrades();
+  }, [selectedSubject, selectedTerm]);
+
+  const fetchGrades = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (selectedSubject) params.append('subject', selectedSubject);
+      if (selectedTerm) params.append('term', selectedTerm);
+
+      const [gradesRes, summaryRes] = await Promise.all([
+        api.get(`${endpoints.myGrades}?${params.toString()}`),
+        api.get(endpoints.myGrades.replace('/my-grades', '/student/1/summary')) // Will be dynamic based on student ID
+      ]);
+
+      setGrades(gradesRes.data);
+      setSummary(summaryRes.data);
+    } catch (error) {
+      console.error('Error fetching grades:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="animate-pulse">Loading grades...</div>;
+  }
+
+  const uniqueSubjects = [...new Set(grades.map(grade => grade.subject))];
+  const uniqueTerms = [...new Set(grades.map(grade => grade.term))];
+
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">My Grades</h2>
-      <p className="text-gray-600">Grade management coming soon...</p>
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">My Grades</h2>
+        
+        {/* Filters */}
+        <div className="flex gap-4 mb-4">
+          <select
+            value={selectedSubject}
+            onChange={(e) => setSelectedSubject(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md"
+          >
+            <option value="">All Subjects</option>
+            {uniqueSubjects.map(subject => (
+              <option key={subject} value={subject}>{subject}</option>
+            ))}
+          </select>
+          
+          <select
+            value={selectedTerm}
+            onChange={(e) => setSelectedTerm(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md"
+          >
+            <option value="">All Terms</option>
+            {uniqueTerms.map(term => (
+              <option key={term} value={term}>{term}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Summary Stats */}
+        {summary && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-blue-800">Overall Average</h3>
+              <p className="text-2xl font-bold text-blue-600">{summary.overall_average}%</p>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-green-800">Total Subjects</h3>
+              <p className="text-2xl font-bold text-green-600">{summary.total_subjects}</p>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-purple-800">Total Assignments</h3>
+              <p className="text-2xl font-bold text-purple-600">{summary.total_assignments}</p>
+            </div>
+            <div className="bg-yellow-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-yellow-800">Grade Level</h3>
+              <p className="text-2xl font-bold text-yellow-600">
+                {summary.overall_average >= 90 ? 'A' : 
+                 summary.overall_average >= 80 ? 'B' : 
+                 summary.overall_average >= 70 ? 'C' : 
+                 summary.overall_average >= 60 ? 'D' : 'F'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Grades Table */}
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Subject
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Assignment Type
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Score
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Grade
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Term
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Date
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {grades.map((grade) => (
+                <tr key={grade.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {grade.subject}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {grade.assignment_type}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {grade.score}/{grade.max_score} ({grade.percentage}%)
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      grade.grade_letter === 'A' ? 'bg-green-100 text-green-800' :
+                      grade.grade_letter === 'B' ? 'bg-blue-100 text-blue-800' :
+                      grade.grade_letter === 'C' ? 'bg-yellow-100 text-yellow-800' :
+                      grade.grade_letter === 'D' ? 'bg-orange-100 text-orange-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {grade.grade_letter}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {grade.term}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(grade.date_recorded).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
